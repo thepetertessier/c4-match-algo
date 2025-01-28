@@ -2,15 +2,22 @@ function _assignMenteeIfPossible(row, mentorAssignments, assignedMentees, maxMen
     let mentor = row.Mentor;
     let mentee = row.Mentee;
 
-    // Make sure mentor doesn't have too many mentees; on first pass, 2 is too many
+    // Ensure the mentor's assignment list is initialized
+    if (!mentorAssignments[mentor]) {
+        mentorAssignments[mentor] = []; // Initialize as an empty array if it doesn't exist
+    }
+
+    // Determine the maximum number of mentees allowed for this mentor
     const maxMentees = (pass === 1) ? 1 : maxMenteesPerMentor[mentor];
+
+    // Check if the mentor has space and the mentee hasn't already been assigned
     if (mentorAssignments[mentor].length < maxMentees) {
-      if (!assignedMentees.has(mentee)) {
-        let score = row.total;
-        mentorAssignments[mentor].push({ mentee: mentee, score: score });
-        assignedMentees.add(mentee);
-        Logger.log(`Pass ${pass}: Assigned ${mentee} to ${mentor} with match score ${score}`);
-      }
+        if (!assignedMentees.has(mentee)) {
+            let score = row.total; // Get the match score from the row
+            mentorAssignments[mentor].push({ mentee: mentee, score: score }); // Add mentee with score
+            assignedMentees.add(mentee); // Mark the mentee as assigned
+            Logger.log(`Pass ${pass}: Assigned ${mentee} to ${mentor} with match score ${score}`);
+        }
     }
 }
 

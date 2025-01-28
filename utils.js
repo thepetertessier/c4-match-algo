@@ -1,8 +1,13 @@
-function exportArrayOfObjectsToSheet(arrayOfObjects, sheetName) {
-  // Get the folder containing the script
+function getWorkingDirectory() {
   var scriptFileId = ScriptApp.getScriptId();
   var scriptFile = DriveApp.getFileById(scriptFileId);
   var scriptFolder = scriptFile.getParents().next();
+  return scriptFolder;
+}
+
+function exportArrayOfObjectsToSheet(arrayOfObjects, sheetName) {
+  // Get the folder containing the script
+  scriptFolder = getWorkingDirectory();
 
   // Search for an existing sheet in the folder
   var files = scriptFolder.getFilesByName(sheetName);

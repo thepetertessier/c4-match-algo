@@ -37,14 +37,14 @@ Algorithm.prototype.addCriterion = function(criterion) {
   this.criteria.push(criterion);
 };
 
-function addMentorFormTitleAndDescription(form) {
-  form.setTitle('Mentor Form')
+function addMenteeFormTitleAndDescription(form) {
+  form.setTitle('Mentee Form')
       .setDescription(`Welcome to C4! We\'re glad you\'re interested in matching with one of our mentors.
 See our homepage here: https://sites.google.com/view/c4-initiative/`);
 }
 
-function addMenteeFormTitleAndDescription(form) {
-  form.setTitle('Mentee Form')
+function addMentorFormTitleAndDescription(form) {
+  form.setTitle('Mentor Form')
       .setDescription(`Thanks for showing interest in becoming a mentor for the C4 Initiative, UVA's low-barrier peer-mentorship CIO!
 
 We're looking for mentors who fit the following criteria:
@@ -112,7 +112,7 @@ Algorithm.prototype.generateForms = function() {
   // Populate forms with respective questions based on criteria
   [mentorForm, menteeForm].forEach(form => form.addSectionHeaderItem()
     .setTitle('Matching questions')
-    .setHelpText('The following questions will be used to match with your mentor/mentee.')
+    .setHelpText('The following questions will be used for mentorship matching.')
   );
 
   this.criteria.forEach(criterion => {
@@ -142,20 +142,6 @@ function avg(a, b) {
   return (a + b) / 2;
 }
 
-function getFromDf(obj, key, defaultValue) {
-  return obj.hasOwnProperty(key) ? obj[key] : defaultValue;
-}
-
-function getCommaSeparatedIntersection(str1, str2) {
-  const arr1 = str1.split(',').map(s => s.trim());
-  const arr2 = str2.split(',').map(s => s.trim());
-  return arr1.filter(value => arr2.includes(value));
-}
-
-function isna(value) {
-  return value == null || value === '';
-}
-
 // Method to calculate match score breakdown
 Algorithm.prototype.calculateScoreBreakdownAndExplanation = function(mentor, mentee) {
   let scoreBreakdown = {};
@@ -166,13 +152,11 @@ Algorithm.prototype.calculateScoreBreakdownAndExplanation = function(mentor, men
   this.criteria.forEach(criterion => {
     const mentorResponse = mentor[criterion.mentorQuestion.title];
     const menteeResponse = mentee[criterion.menteeQuestion.title];
-    const score = criterion.scoringRule(mentorResponse, menteeResponse);
+    const result = criterion.scoringRule(mentorResponse, menteeResponse);
     
-    scoreBreakdown[criterion.title] = score;
-    totalScore += score;
-
-    // TODO: Add score explanations
-    scoreExplanation[criterion.title] = `Score for ${criterion.title}: ${score}`;
+    scoreBreakdown[criterion.title] = result.score;
+    totalScore += result.score;
+    scoreExplanation[criterion.title] = result.explanation;
   });
 
   scoreBreakdown['total'] = totalScore;
@@ -195,7 +179,7 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
       const mentorId = mentor['Computing id'];
 
       // Calculate match score using the getMatchScoreBreakdown method
-      const { scoreBreakdown, matchExplanation } = this.calculateScoreBreakdownAndExplanation(mentor, mentee);
+      const { scoreBreakdown, scoreExplanation } = this.calculateScoreBreakdownAndExplanation(mentor, mentee);
 
       // Create match information object
       const matchInfo = {
@@ -209,7 +193,7 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
 
       // Store breakdowns and explanations using mentor-mentee pair as the key
       breakdowns[`${mentorId}-${menteeId}`] = scoreBreakdown;
-      explanations[`${mentorId}-${menteeId}`] = matchExplanation;
+      explanations[`${mentorId}-${menteeId}`] = scoreExplanation;
     });
   });
 

@@ -1,5 +1,5 @@
-const mentorFormResponseSheetId = '15MaTdBmDytbJAWGvKBKHbHmcvQl8sJ3GH1MNCvkstnc';
-const menteeFormResponseSheetId = '1Q_eHcLzBrd-o_UuaPwSlNK_njBeZmuyYsvFU-KBHMFs';
+const mentorFormResponseSheetId = '1pLGcv_udh43xM-uZkyd1-M1HJRNngrCAFqQ-UiGNS0g';
+const menteeFormResponseSheetId = '1pLGcv_udh43xM-uZkyd1-M1HJRNngrCAFqQ-UiGNS0g';
 
 function _getFormResponses(sheetId, sheetName) {
   var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
@@ -17,5 +17,5 @@ function _getFormResponses(sheetId, sheetName) {
   return responses;
 }
 
-const getMentorFormResponses = () => _getFormResponses(mentorFormResponseSheetId, 'Form Responses 1');
-const getMenteeFormResponses = () => _getFormResponses(menteeFormResponseSheetId, 'Form Responses 1');
+const getMentorFormResponses = () => _getFormResponses(mentorFormResponseSheetId, 'Mentors');
+const getMenteeFormResponses = () => _getFormResponses(menteeFormResponseSheetId, 'Mentees');
