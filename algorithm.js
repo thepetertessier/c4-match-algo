@@ -1,5 +1,10 @@
 // Provides the Algorithm class, along with supporting classes Question and Criterion, and methods
 
+// Types of questions
+const MULTIPLE_CHOICE = 'MULTIPLE_CHOICE'
+const CHECKBOX = 'CHECKBOX'
+const LIKERT = 'LIKERT'
+
 activity_categories = ['Social & Hobby', 'Public Service', 'Media Group', 'Cultural & Ethnic',
     'Visual & Performing Arts', 'Honor Society', 'Academic & Professional',
     'A Cappella', 'Peer Mentors', 'Debate', 'Choir'
@@ -8,23 +13,24 @@ activity_categories = ['Social & Hobby', 'Public Service', 'Media Group', 'Cultu
 // Question constructor
 function Question(title, type, choices, required=true) {
   // Validate the question type
-  const validTypes = ['CHECKBOX', 'MULTIPLE_CHOICE'];
+  const validTypes = [CHECKBOX, MULTIPLE_CHOICE, LIKERT];
   if (!validTypes.includes(type)) {
     throw new Error(`Invalid question type: ${type}. Must be one of ${validTypes.join(', ')}.`);
   }
 
   this.title = title;
-  this.type = type; // e.g., 'CHECKBOX', 'MULTIPLE_CHOICE'
+  this.type = type; // e.g., CHECKBOX, MULTIPLE_CHOICE
   this.choices = choices; // Array of possible choices
   this.required = required; // true/false if question is required
 }
 
 // Criterion constructor
-function Criterion(title, mentorQuestion, menteeQuestion, scoringRule) {
-  this.title = title;
+function Criterion(identifier, mentorQuestion, menteeQuestion, scoringRule, addMenteePreferenceQuestion=false) {
+  this.identifier = identifier;
   this.mentorQuestion = mentorQuestion;
   this.menteeQuestion = menteeQuestion;
   this.scoringRule = scoringRule; // Function to calculate score (float) given mentorResponse and menteeResponse
+  this.addMenteePreferenceQuestion = addMenteePreferenceQuestion; // Adds another question asking mentee how much they prefer this; scales the score accordingly
 }
 
 // Algorithm constructor
@@ -88,6 +94,9 @@ function addPersonalInfoToForm(form) {
       .build());
 }
 
+const getPreferenceQuestion = criterionIdentifier =>
+  `How much do you care about the above question (${criterionIdentifier})?`
+
 // Modified generateForms method in the Algorithm prototype
 Algorithm.prototype.generateForms = function() {
   // Get the folder containing this script
@@ -120,20 +129,35 @@ Algorithm.prototype.generateForms = function() {
     const menteeQuestionAndForm = { question: criterion.menteeQuestion, form: menteeForm };
 
     [mentorQuestionAndForm, menteeQuestionAndForm].forEach(({ question, form }) => {
-      if (question.type === 'CHECKBOX') {
-        form.addCheckboxItem()
-          .setTitle(question.title)
-          .setChoiceValues(question.choices)
-          .setRequired(question.required);
-      } else if (question.type === 'MULTIPLE_CHOICE') {
-        form.addMultipleChoiceItem()
-          .setTitle(question.title)
-          .setChoiceValues(question.choices)
-          .setRequired(question.required);
-      } else {
-        throw new Error(`Unsupported question type: ${question.type}`);
+      switch (question.type) {
+        case CHECKBOX:
+          form.addCheckboxItem()
+            .setTitle(question.title)
+            .setChoiceValues(question.choices)
+            .setRequired(question.required);
+          break;
+        case MULTIPLE_CHOICE:
+          form.addMultipleChoiceItem()
+            .setTitle(question.title)
+            .setChoiceValues(question.choices)
+            .setRequired(question.required);
+          break;
+        case LIKERT:
+          form.addScaleItem()
+            .setTitle(question.title)
+            .setLabels(question.choices[0], question.choices[1])
+            .setRequired(question.required);
+          break;
+        default:
+          throw new Error(`Unsupported question type: ${question.type}`);
       }
     });
+    if (criterion.addMenteePreferenceQuestion) {
+      menteeForm.addScaleItem()
+        .setTitle(getPreferenceQuestion(criterion.identifier))
+        .setLabels('Not at all', 'A lot')
+        .setRequired(criterion.menteeQuestion.required);
+    }
   });
 };
 
@@ -152,11 +176,17 @@ Algorithm.prototype.calculateScoreBreakdownAndExplanation = function(mentor, men
   this.criteria.forEach(criterion => {
     const mentorResponse = mentor[criterion.mentorQuestion.title];
     const menteeResponse = mentee[criterion.menteeQuestion.title];
-    const result = criterion.scoringRule(mentorResponse, menteeResponse);
+    let {score, explanation} = criterion.scoringRule(mentorResponse, menteeResponse);
     
-    scoreBreakdown[criterion.title] = result.score;
-    totalScore += result.score;
-    scoreExplanation[criterion.title] = result.explanation;
+    if (criterion.addMenteePreferenceQuestion) {
+      let menteePreference = +mentee[getPreferenceQuestion(criterion.identifier)];
+      menteePreference -= 1;
+      score *= menteePreference;
+    }
+
+    scoreBreakdown[criterion.identifier] = score;
+    totalScore += score;
+    scoreExplanation[criterion.identifier] = explanation;
   });
 
   scoreBreakdown['total'] = totalScore;
@@ -185,6 +215,7 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
       const matchInfo = {
         Mentee: menteeId,
         Mentor: mentorId,
+        score: scoreBreakdown.total, // sometimes it's referenced as score instead of total
         ...scoreBreakdown
       };
 

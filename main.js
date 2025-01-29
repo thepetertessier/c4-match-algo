@@ -27,9 +27,9 @@ function generateMatches() {
 
   const { matches, breakdowns, explanations } = algorithm.generateMatchArray(mentorResponses, menteeResponses);
 
-  Logger.log(matches);
-  Logger.log(JSON.stringify(breakdowns, null, 2));
-  Logger.log(JSON.stringify(explanations, null, 2));
+  // Logger.log(matches);
+  // Logger.log(JSON.stringify(breakdowns, null, 2));
+  // Logger.log(JSON.stringify(explanations, null, 2));
 
   exportMatchesToSheet(matches);
 

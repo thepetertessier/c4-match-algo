@@ -36,7 +36,7 @@ function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
         if (formattedScore.endsWith('.0')) {
           formattedScore = formattedScore.slice(0, -2);
         }
-        toWrite.push(`${text} (${formattedScore})`);
+        toWrite.push(`${category}: ${text} (${formattedScore})`);
       }
 
       toWrite.push(`TOTAL SCORE: ${total}`);

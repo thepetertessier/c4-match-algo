@@ -14,7 +14,7 @@ function _assignMenteeIfPossible(row, mentorAssignments, assignedMentees, maxMen
     if (mentorAssignments[mentor].length < maxMentees) {
         if (!assignedMentees.has(mentee)) {
             let score = row.total; // Get the match score from the row
-            mentorAssignments[mentor].push({ mentee: mentee, score: score }); // Add mentee with score
+            mentorAssignments[mentor].push({ mentee, score }); // Add mentee with score
             assignedMentees.add(mentee); // Mark the mentee as assigned
             Logger.log(`Pass ${pass}: Assigned ${mentee} to ${mentor} with match score ${score}`);
         }
