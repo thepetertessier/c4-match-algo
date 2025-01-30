@@ -72,7 +72,7 @@ function addPersonalInfoToForm(form) {
     .setRequired(true)
     .setValidation(FormApp.createTextValidation()
       .requireTextMatchesPattern('^[a-z0-9]+$')
-      .setHelpText('Please enter a valid Computing ID (numbers and letters only, lowercase).')
+      .setHelpText('Please enter a valid Computing id (numbers and letters only, lowercase).')
       .build());
 
   // Add a text item for Email with email validation
@@ -96,6 +96,8 @@ function addPersonalInfoToForm(form) {
 
 const getPreferenceQuestion = criterionIdentifier =>
   `How important is the previous question (${criterionIdentifier}) to you in the context of matching?`
+
+const getMaxMenteesQuestion = () => 'What is the maximum number of mentees that you are comfortable mentoring?';
 
 // Modified generateForms method in the Algorithm prototype
 Algorithm.prototype.generateForms = function() {
@@ -160,6 +162,12 @@ Algorithm.prototype.generateForms = function() {
     }
   });
 
+  // Ask mentors the max number of mentees they're comfortable with
+  mentorForm.addScaleItem()
+    .setTitle(getMaxMenteesQuestion())
+    .setLabels('1', '5')
+    .setRequired(true);
+
   // Add free response at the end
   [mentorForm, menteeForm].forEach(form => form.addParagraphTextItem()
     .setTitle('Is there anything else you would like us to know?')
@@ -205,6 +213,7 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
   const matches = [];
   const breakdowns = {};
   const explanations = {};
+  const maxMentees = {};
 
   // Loop through each mentee
   mentees.forEach(mentee => {
@@ -232,12 +241,14 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
       breakdowns[`${mentorId}-${menteeId}`] = scoreBreakdown;
       explanations[`${mentorId}-${menteeId}`] = scoreExplanation;
     });
+
+    maxMentees[menteeId] = mentee[getMaxMenteesQuestion()];
   });
 
   // Sort matches by the total score in descending order
   matches.sort((a, b) => b.total - a.total);
 
-  return { matches, breakdowns, explanations };
+  return { matches, breakdowns, explanations, maxMentees };
 }
 
 

@@ -51,6 +51,7 @@ function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
       doc.getBody().setText(toWrite.join('\n'));
       const file = DriveApp.getFileById(doc.getId());
       explanationsFolder.addFile(file);
+      DriveApp.getRootFolder().removeFile(file); // Remove from root folder to avoid clutter
     }
   }
   Logger.log(`Match explanations written to folder "${folderName}".`)

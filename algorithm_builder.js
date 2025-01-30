@@ -231,16 +231,16 @@ function build_algorithm() {
     "Youth & Social Innovation (BSEd)"
   ];
 
-  const majorQuestion = new Question(
-    'Major(s)',
+  const majorQuestion = isMentor => new Question(
+    isMentor ? 'Major(s)' : 'What major(s) would you like your mentor to have?',
     CHECKBOX,
     majors
   );
 
   algorithm.addCriterion(new Criterion(
     'major',
-    majorQuestion,
-    majorQuestion,
+    majorQuestion(true),
+    majorQuestion(false),
     getCheckboxIntersectionRule(4), // 4 points per matching major
     true
   ));
@@ -281,16 +281,16 @@ function build_algorithm() {
     "Technology Ethics"
   ];
 
-  const minorQuestion = new Question(
-    'Minor(s)',
+  const minorQuestion = title => new Question(
+    title,
     CHECKBOX,
     minors
   );
 
   algorithm.addCriterion(new Criterion(
     'minor',
-    minorQuestion,
-    minorQuestion,
+    minorQuestion('Minor(s)'),
+    minorQuestion('What minor(s) would you like your mentor to have?'),
     getCheckboxIntersectionRule(4),
     true
   ));

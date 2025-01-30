@@ -25,15 +25,12 @@ function generateMatches() {
   var mentorResponses = getMentorFormResponses();
   var menteeResponses = getMenteeFormResponses();
 
-  const { matches, breakdowns, explanations } = algorithm.generateMatchArray(mentorResponses, menteeResponses);
-
-  // Logger.log(matches);
-  // Logger.log(JSON.stringify(breakdowns, null, 2));
-  // Logger.log(JSON.stringify(explanations, null, 2));
+  const { matches, breakdowns, explanations, maxMentees } = algorithm.generateMatchArray(mentorResponses, menteeResponses);
 
   exportMatchesToSheet(matches);
 
-  const mentorAssignments = assignMenteesToMentors(matches, {'dwj7ma':3}, new Set(['petrbogus2']));
+  const menteeIdSet = new Set(menteeResponses.map(mentee => mentee['Computing id']));
+  const mentorAssignments = assignMenteesToMentors(matches, maxMentees, menteeIdSet);
   printMentorAssignments(mentorAssignments);
   writeMentorAssignmentsToGoogleSheet(mentorAssignments);
   writeMatchExplanations(mentorAssignments, breakdowns, explanations)
