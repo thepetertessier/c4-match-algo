@@ -22,6 +22,12 @@ const getLikertDifferenceRule = multiplier =>
     explanation: `The mentor said '${mentor}', and the mentee said '${mentee}'.`
   });
 
+const getLikertDegreeRule = multiplier =>
+  (mentor, mentee) => ({
+    score: multiplier*(+mentee - 1)*(+mentor - 2),
+    explanation: `The mentee prefers this to a degree of ${mentee}/5, and the mentor this to a degree of ${mentor}/5.`
+  });
+
 
 // The main function we provide
 function build_algorithm() {
@@ -66,7 +72,7 @@ function build_algorithm() {
         : yearsOlder === 0 ? {score: -20, explanation: 'The mentor is as old as the mentee.'}
         : {score: 0, explanation: 'The mentor is older than the mentee.'};
     }
-  ))
+  ));
 
   // Gender
   algorithm.addCriterion(new Criterion(
@@ -99,12 +105,13 @@ function build_algorithm() {
       'Science and Research', 'Writing/Blogging', 'Environmental Sustainability',
       'Cooking/Baking', 'Fitness/Wellness', 'Photography/Filmmaking'
     ]
-  )
+  );
   algorithm.addCriterion(new Criterion(
     'extracurricular interests',
     extracurricularInterestsQuestion,
     extracurricularInterestsQuestion,
-    getCheckboxIntersectionRule(2) // 2 points per matching interest
+    getCheckboxIntersectionRule(2), // 2 points per matching interest
+    true // Ask mentee preference
   ));
 
   // School
@@ -134,7 +141,8 @@ function build_algorithm() {
     'school',
     schoolQuestion,
     schoolQuestion,
-    getMultipleChoiceMatchRule(3)
+    getMultipleChoiceMatchRule(3),
+    true
   ));
 
   // Major
@@ -233,7 +241,8 @@ function build_algorithm() {
     'major',
     majorQuestion,
     majorQuestion,
-    getCheckboxIntersectionRule(4) // 4 points per matching major
+    getCheckboxIntersectionRule(4), // 4 points per matching major
+    true
   ));
 
   // Minor
@@ -282,7 +291,8 @@ function build_algorithm() {
     'minor',
     minorQuestion,
     minorQuestion,
-    getCheckboxIntersectionRule(4)
+    getCheckboxIntersectionRule(4),
+    true
   ));
 
   // Study style
@@ -296,8 +306,29 @@ function build_algorithm() {
     'study style',
     studyStyleQuestion,
     studyStyleQuestion,
-    getMultipleChoiceMatchRule(3)
-  ))
+    getMultipleChoiceMatchRule(3),
+    true
+  ));
+
+  // Meet up
+  const meetUpStyleQuestion = new Question(
+    'Preferred way to meet up (select up to 2)',
+    CHECKBOX,
+    [
+      'One-on-One Meetings',
+      'Group Meetings',
+      'Virtual Check-ins',
+      'Casual Hangouts'
+    ]
+  );
+
+  algorithm.addCriterion(new Criterion(
+    'meet up',
+    meetUpStyleQuestion,
+    meetUpStyleQuestion,
+    getCheckboxIntersectionRule(1),
+    true
+  ));
 
   // Academic interests
   const academicInterestsQuestion = new Question(
@@ -310,26 +341,125 @@ function build_algorithm() {
     'academic interests',
     academicInterestsQuestion,
     academicInterestsQuestion,
-    getCheckboxIntersectionRule(2)
-  ))
+    getCheckboxIntersectionRule(2),
+    true
+  ));
 
   // Extroversion
   algorithm.addCriterion(new Criterion(
     'extroversion',
     new Question(
-      'How introverted/extroverted would you like your MENTOR to be?',
-      LIKERT,
-      ['Very introverted', 'Very extroverted']
-    ),
-    new Question(
       'How introverted/extroverted are you?',
       LIKERT,
       ['Very introverted', 'Very extroverted']
     ),
+    new Question(
+      'How introverted/extroverted would you like your MENTOR to be?',
+      LIKERT,
+      ['Very introverted', 'Very extroverted']
+    ),
     getLikertDifferenceRule(1),
-    true
-  ))
+    true // Ask the mentee how much they prefer this
+  ));
 
+  // Personality traits
+  const personalityTraits = [
+    'Outgoing',
+    'Reserved',
+    'Adventurous',
+    'Empathetic',
+    'Analytical',
+    'Creative',
+    'Organized',
+    'Spontaneous'
+  ];
+
+  algorithm.addCriterion(new Criterion(
+    'personality traits',
+    new Question(
+      'Personality Traits (select up to 4)',
+      CHECKBOX,
+      personalityTraits
+    ),
+    new Question(
+      'What personality traits would you prefer your mentor to have (select up to 4)?',
+      CHECKBOX,
+      personalityTraits
+    ),
+    getCheckboxIntersectionRule(1),
+    true
+  ));
+
+  // Research
+  algorithm.addCriterion(new Criterion(
+    'research',
+    new Question(
+      'How much research experience do you have?',
+      LIKERT,
+      ['None', 'A lot']
+    ),
+    new Question(
+      'How much do you prefer that your mentor has been involved in research?',
+      LIKERT,
+      ['Not at all', 'A lot']
+    ),
+    getLikertDegreeRule(1)
+  ));
+
+  // Career
+  algorithm.addCriterion(new Criterion(
+    'career',
+    new Question(
+      'How much career experience do you have (e.g., internships)?',
+      LIKERT,
+      ['None', 'A lot']
+    ),
+    new Question(
+      'How much do you prefer that your mentor has career experience (e.g., internships)?',
+      LIKERT,
+      ['Not at all', 'A lot']
+    ),
+    getLikertDegreeRule(1)
+  ));
+
+  // Time
+  algorithm.addCriterion(new Criterion(
+    'time',
+    new Question(
+      'What is the ideal amount of meetings per MONTH that you\'d want to have with your mentee(s)?',
+      LIKERT,
+      ['1', '5']
+    ),
+    new Question(
+      'What is the ideal amount of meetings per MONTH that you\'d want to have with your mentor?',
+      LIKERT,
+      ['1', '5']
+    ),
+    getLikertDifferenceRule(2)
+  ));
+
+  // Mentorship style
+  const mentorshipStyleQuestion = new Question(
+    'What do you want this mentorship to look like (select all that apply)?',
+    CHECKBOX,
+    [
+      'A friend to grab a cup of coffee with',
+      'A guide for college life',
+      'A study buddy',
+      'A career advisor',
+      'An academic advisor',
+      'Very low commitment',
+      'Frequent meetings'
+    ]
+  );
+
+  algorithm.addCriterion(new Criterion(
+    'mentorship style',
+    mentorshipStyleQuestion,
+    mentorshipStyleQuestion,
+    getCheckboxIntersectionRule(1),
+    true
+  ));
 
   return algorithm;
 }

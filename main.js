@@ -33,7 +33,7 @@ function generateMatches() {
 
   exportMatchesToSheet(matches);
 
-  const mentorAssignments = assignMenteesToMentors(matches, {'m00':3}, new Set(['m0']));
+  const mentorAssignments = assignMenteesToMentors(matches, {'dwj7ma':3}, new Set(['petrbogus2']));
   printMentorAssignments(mentorAssignments);
   writeMentorAssignmentsToGoogleSheet(mentorAssignments);
   writeMatchExplanations(mentorAssignments, breakdowns, explanations)

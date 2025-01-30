@@ -72,7 +72,7 @@ function addPersonalInfoToForm(form) {
     .setRequired(true)
     .setValidation(FormApp.createTextValidation()
       .requireTextMatchesPattern('^[a-z0-9]+$')
-      .setHelpText('Please enter a valid Computing ID (alphanumeric only, no spaces, lowercase).')
+      .setHelpText('Please enter a valid Computing ID (numbers and letters only, lowercase).')
       .build());
 
   // Add a text item for Email with email validation
@@ -95,7 +95,7 @@ function addPersonalInfoToForm(form) {
 }
 
 const getPreferenceQuestion = criterionIdentifier =>
-  `How much do you care about the above question (${criterionIdentifier})?`
+  `How important is the previous question (${criterionIdentifier}) to you in the context of matching?`
 
 // Modified generateForms method in the Algorithm prototype
 Algorithm.prototype.generateForms = function() {
@@ -105,8 +105,8 @@ Algorithm.prototype.generateForms = function() {
   var scriptFolder = scriptFile.getParents().next();
 
   // Create forms in the same folder
-  var mentorForm = FormApp.create('Mentor Form');
-  var menteeForm = FormApp.create('Mentee Form');
+  var mentorForm = FormApp.create('Join C4 as a Mentor');
+  var menteeForm = FormApp.create('Join C4 as a Mentee');
 
   // Move forms to the folder
   DriveApp.getFileById(mentorForm.getId()).moveTo(scriptFolder);
@@ -134,7 +134,7 @@ Algorithm.prototype.generateForms = function() {
           form.addCheckboxItem()
             .setTitle(question.title)
             .setChoiceValues(question.choices)
-            .setRequired(question.required);
+            .setRequired(false); // Always let them select none
           break;
         case MULTIPLE_CHOICE:
           form.addMultipleChoiceItem()
@@ -159,6 +159,12 @@ Algorithm.prototype.generateForms = function() {
         .setRequired(criterion.menteeQuestion.required);
     }
   });
+
+  // Add free response at the end
+  [mentorForm, menteeForm].forEach(form => form.addParagraphTextItem()
+    .setTitle('Is there anything else you would like us to know?')
+    .setRequired(false)
+  );
 };
 
 

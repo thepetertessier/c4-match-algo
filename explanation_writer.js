@@ -42,7 +42,7 @@ function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
       toWrite.push(`TOTAL SCORE: ${total}`);
       toWrite.push('\nThe following did not contribute to the score:');
       for (const category of didntContribute) {
-        toWrite.push(`\t${explanation[category]}`);
+        toWrite.push(`\t${category}: ${explanation[category]}`);
       }
 
       // Create and save the document in the folder

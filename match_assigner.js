@@ -63,12 +63,10 @@ function printMentorAssignments(mentorAssignments) {
 
 function writeMentorAssignmentsToGoogleSheet(mentorAssignments) {
   // Transform mentorAssignments into an array of objects
-  var arrayOfObjects = Object.keys(mentorAssignments).map(mentor => {
-    return {
+  var arrayOfObjects = Object.keys(mentorAssignments).map(mentor => ({
       Mentor: mentor,
-      Mentees: mentorAssignments[mentor].map(pair => `${pair[0]} (${pair[1]})`).join(', ')
-    };
-  });
+      Mentees: mentorAssignments[mentor].map(pair =>`${pair.mentee} (${pair.score})`).join(', ')
+  }));
 
   // Call exportArrayOfObjectsToSheet with the transformed data
   exportArrayOfObjectsToSheet(arrayOfObjects, 'Mentor Assignments Sheet');
