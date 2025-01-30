@@ -35,8 +35,12 @@ function assignMenteesToMentors(matchArray, maxMenteesPerMentor, menteeIds) {
   // First pass: Assign each mentor at least one mentee
   matchArrayCopy.forEach(row => _assignMenteeIfPossible(row, mentorAssignments, assignedMentees, maxMenteesPerMentor, 1));
 
+  Logger.log(`mentorAssignments after first pass: ${JSON.stringify(mentorAssignments, null)}`)
+
   // Second pass: Assign additional mentees until maxMentees is reached
   matchArrayCopy.forEach(row => _assignMenteeIfPossible(row, mentorAssignments, assignedMentees, maxMenteesPerMentor, 2));
+
+  Logger.log(`mentorAssignments after second pass: ${JSON.stringify(mentorAssignments, null)}`)
 
   // Check if all mentees are assigned
   if (menteeIds.size !== assignedMentees.size) {
@@ -46,26 +50,29 @@ function assignMenteesToMentors(matchArray, maxMenteesPerMentor, menteeIds) {
   return mentorAssignments;
 }
 
-function printMentorAssignments(mentorAssignments) {
-  Logger.log("\nMentor Assignments:\n" + "=".repeat(20));
+function printMentorAssignments(mentorAssignments, mentorNameMap, menteeNameMap) {
+  let toPrint = [];
+  toPrint.push("\nMentor Assignments:", "=".repeat(20));
 
   for (let mentor in mentorAssignments) {
     let mentees = mentorAssignments[mentor];
     let menteesList = mentees.length > 0 
-      ? mentees.map(({ mentee, score }) => `${mentee} (${score})`).join(', ') 
+      ? mentees.map(({ mentee, score }) => `${menteeNameMap[mentee]} (${mentee}, ${score})`).join(', ') 
       : "No mentees assigned";
     
-    Logger.log(`Mentor: ${mentor} | Mentees: ${menteesList}`);
+    toPrint.push(`Mentor: ${mentorNameMap[mentor]} (${mentor}) | Mentees: ${menteesList}`);
   }
 
-  Logger.log("=".repeat(20));
+  toPrint.push("=".repeat(20));
+
+  Logger.log(toPrint.join('\n'));
 }
 
-function writeMentorAssignmentsToGoogleSheet(mentorAssignments) {
+function writeMentorAssignmentsToGoogleSheet(mentorAssignments, mentorNameMap, menteeNameMap) {
   // Transform mentorAssignments into an array of objects
   var arrayOfObjects = Object.keys(mentorAssignments).map(mentor => ({
-      Mentor: mentor,
-      Mentees: mentorAssignments[mentor].map(pair =>`${pair.mentee} (${pair.score})`).join(', ')
+      Mentor: `${mentorNameMap[mentor]} (${mentor})`,
+      Mentees: mentorAssignments[mentor].map(({ mentee, score }) =>`${menteeNameMap[mentee]} (${mentee}, ${score})`).join(', ')
   }));
 
   // Call exportArrayOfObjectsToSheet with the transformed data

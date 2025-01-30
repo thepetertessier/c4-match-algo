@@ -22,16 +22,19 @@ function generateForms() {
 function generateMatches() {
   const algorithm = build_algorithm();
 
-  var mentorResponses = getMentorFormResponses();
-  var menteeResponses = getMenteeFormResponses();
+  const mentorResponses = getMentorFormResponses();
+  const menteeResponses = getMenteeFormResponses();
 
-  const { matches, breakdowns, explanations, maxMentees } = algorithm.generateMatchArray(mentorResponses, menteeResponses);
+  const mentorNameMap = getNameMap(mentorResponses);
+  const menteeNameMap = getNameMap(menteeResponses);
+
+  const { matches, breakdowns, explanations, maxMentees } = algorithm.generateMatchArray(mentorResponses, menteeResponses, mentorNameMap, menteeNameMap);
 
   exportMatchesToSheet(matches);
 
   const menteeIdSet = new Set(menteeResponses.map(mentee => mentee['Computing id']));
   const mentorAssignments = assignMenteesToMentors(matches, maxMentees, menteeIdSet);
-  printMentorAssignments(mentorAssignments);
-  writeMentorAssignmentsToGoogleSheet(mentorAssignments);
-  writeMatchExplanations(mentorAssignments, breakdowns, explanations)
+  printMentorAssignments(mentorAssignments, mentorNameMap, menteeNameMap);
+  writeMentorAssignmentsToGoogleSheet(mentorAssignments, mentorNameMap, menteeNameMap);
+  writeMatchExplanations(mentorAssignments, breakdowns, explanations, mentorNameMap, menteeNameMap)
 }

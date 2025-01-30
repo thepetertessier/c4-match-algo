@@ -208,7 +208,7 @@ Algorithm.prototype.calculateScoreBreakdownAndExplanation = function(mentor, men
   return { scoreBreakdown, scoreExplanation };
 };
 
-Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
+Algorithm.prototype.generateMatchArray = function(mentors, mentees, mentorNameMap, menteeNameMap) {
   // Initialize arrays and objects to store results
   const matches = [];
   const breakdowns = {};
@@ -228,8 +228,10 @@ Algorithm.prototype.generateMatchArray = function(mentors, mentees) {
 
       // Create match information object
       const matchInfo = {
-        Mentee: menteeId,
         Mentor: mentorId,
+        Mentee: menteeId,
+        mentorName: mentorNameMap[mentorId],
+        menteeName: menteeNameMap[menteeId],
         score: scoreBreakdown.total, // sometimes it's referenced as score instead of total
         ...scoreBreakdown
       };

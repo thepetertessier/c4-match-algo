@@ -39,3 +39,7 @@ function exportArrayOfObjectsToSheet(arrayOfObjects, sheetName) {
 
   Logger.log(`Data exported to Google Sheets named '${sheetName}' in the same directory as the script.`);
 }
+
+const getNameMap = responses => Object.fromEntries(
+  responses.map(mentor => [mentor['Computing id'], mentor['Full name']])
+);

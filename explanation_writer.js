@@ -1,4 +1,4 @@
-function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
+function writeMatchExplanations(mentorAssignments, breakdowns, explanations, mentorNameMap, menteeNameMap) {
   const folderName = 'explanations';
   const parentFolder = getWorkingDirectory()
 
@@ -12,7 +12,7 @@ function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
     const mentees = mentorAssignments[mentor];
     for (const { mentee, score } of mentees) {
       const total = score;
-      const header = `Score explanation for ${mentor} (mentor) and ${mentee} (mentee):`;
+      const header = `Score explanation for ${mentorNameMap[mentor]} (${mentor}, mentor) and ${menteeNameMap[mentee]} (${mentee}, mentee):`;
       const toWrite = [];
       toWrite.push(header);
       toWrite.push('='.repeat(header.length));
@@ -46,7 +46,7 @@ function writeMatchExplanations(mentorAssignments, breakdowns, explanations) {
       }
 
       // Create and save the document in the folder
-      const docName = `${total}_${mentor}_${mentee}`;
+      const docName = `${total}_${mentor}_${mentee} (${mentorNameMap[mentor]} and ${menteeNameMap[mentee]})`;
       const doc = DocumentApp.create(docName);
       doc.getBody().setText(toWrite.join('\n'));
       const file = DriveApp.getFileById(doc.getId());
